@@ -1,33 +1,40 @@
 package main
 
 import (
-	"crypto/md5"
-	"crypto/sha1"
+	"crypto/tls"
+	"database/sql"
 	"fmt"
-	"io"
+	"net/http"
 	"os"
 	"os/exec"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
-	// Hardcoded credentials
-	password := "supersecret123"
-	fmt.Println("Password is:", password)
+	// Insecure TLS: skip certificate verification
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+	resp, _ := client.Get("https://expired.badssl.com")
+	fmt.Println("Response:", resp.Status)
 
-	// Insecure hashing
-	data := []byte("sensitive data")
-	md5Sum := md5.Sum(data)
-	sha1Sum := sha1.Sum(data)
-	fmt.Printf("MD5: %x, SHA1: %x\n", md5Sum, sha1Sum)
+	// SQL injection
+	userInput := os.Args[1]
+	db, _ := sql.Open("mysql", "root:password@tcp(localhost:3306)/testdb")
+	query := "SELECT * FROM users WHERE name = '" + userInput + "'"
+	rows, _ := db.Query(query)
+	defer rows.Close()
+	fmt.Println("Executed insecure query")
 
 	// Command injection
-	userInput := "ls -al" // pretend this came from user input
-	cmd := exec.Command("sh", "-c", userInput)
-	out, _ := cmd.Output()
-	fmt.Println(string(out))
+	cmd := exec.Command("sh", "-c", "ping -c 1 "+userInput)
+	output, _ := cmd.CombinedOutput()
+	fmt.Println(string(output))
 
-	// Writing to world-writable file
-	f, _ := os.OpenFile("/tmp/insecure.txt", os.O_CREATE|os.O_WRONLY, 0777)
-	defer f.Close()
-	io.WriteString(f, "This is unsafe\n")
+	// Hardcoded secret
+	secret := "aws_access_key=AKIAIOSFODNN7EXAMPLE"
+	fmt.Println("Leaked secret:", secret)
 }
