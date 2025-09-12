@@ -2,15 +2,14 @@
 name: Self Hosted Runner Test
 
 on:
-  workflow_dispatch:   # allows you to trigger manually
-  push:                # optional: also runs on any push
+  workflow_dispatch:
 
 jobs:
   test-runner:
-    runs-on: [self-hosted, Linux, X64]   # must match your runner labels
+    runs-on: [self-hosted, Linux, ARM64]   # 👈 match the runner labels shown in UI
+    environment: test                      # if you want debug vars from your "test" env
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Show runner info
         run: |
@@ -18,11 +17,8 @@ jobs:
           echo "Runner OS: $RUNNER_OS"
           echo "Runner arch: $RUNNER_ARCH"
 
-      - name: Simulate work
+      - name: Simulate workload
         run: |
-          echo "Starting fake workload..."
-          sleep 30
-          echo "Finished fake workload!"
-
-      - name: Mark completion
-        run: echo "✅ Job finished successfully"
+          echo "Starting workload on ARM64 runner..."
+          sleep 20
+          echo "Done ✅"
