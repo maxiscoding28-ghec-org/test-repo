@@ -1,0 +1,28 @@
+# .github/workflows/self-hosted-runner-test.yml
+name: Self Hosted Runner Test
+
+on:
+  workflow_dispatch:   # allows you to trigger manually
+  push:                # optional: also runs on any push
+
+jobs:
+  test-runner:
+    runs-on: [self-hosted, Linux, X64]   # must match your runner labels
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Show runner info
+        run: |
+          echo "Runner name: $RUNNER_NAME"
+          echo "Runner OS: $RUNNER_OS"
+          echo "Runner arch: $RUNNER_ARCH"
+
+      - name: Simulate work
+        run: |
+          echo "Starting fake workload..."
+          sleep 30
+          echo "Finished fake workload!"
+
+      - name: Mark completion
+        run: echo "✅ Job finished successfully"
