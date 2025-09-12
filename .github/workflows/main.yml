@@ -7,6 +7,7 @@ on:
 jobs:
   test-runner:
     runs-on: [self-hosted, Linux, ARM64]   # 👈 match the runner labels shown in UI                     # if you want debug vars from your "test" env
+    environment: test
     steps:
       - uses: actions/checkout@v4
 
